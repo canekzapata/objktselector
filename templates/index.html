@@ -403,7 +403,7 @@
 
         async function loadCollectionCount() {
             try {
-                const response = await fetch('http://localhost:5000/api/collection');
+                const response = await fetch('/api/collection');
                 const data = await response.json();
                 myCollection = data.collection || [];
                 document.getElementById('collectionCount').textContent = myCollection.length;
@@ -425,7 +425,7 @@
             try {
                 if (isCurrentlySaved) {
                     // Eliminar de la colección
-                    const response = await fetch('http://localhost:5000/api/collection/remove', {
+                    const response = await fetch('/api/collection/remove', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ token_id: token.token_id })
@@ -440,7 +440,7 @@
                     }
                 } else {
                     // Agregar a la colección
-                    const response = await fetch('http://localhost:5000/api/collection/add', {
+                    const response = await fetch('/api/collection/add', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(token)
@@ -478,7 +478,7 @@
             document.getElementById('gallery').innerHTML = '';
             
             try {
-                const response = await fetch('http://localhost:5000/api/collection');
+                const response = await fetch('/api/collection');
                 const data = await response.json();
                 
                 if (data.collection && data.collection.length > 0) {
@@ -513,7 +513,7 @@
             document.getElementById('filters').style.display = 'none';
 
             try {
-                const response = await fetch('http://localhost:5000/api/get-tokens', {
+                const response = await fetch('/api/get-tokens', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -610,7 +610,7 @@
                 gallery.appendChild(card);
             });
         }
-        
+        }
 
         function filterByType(type) {
             currentFilter = type;
