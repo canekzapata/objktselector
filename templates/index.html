@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objkt NFT Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .search-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: #e9ecef;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .nft-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .nft-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .nft-media {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nft-media img, .nft-media video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .nft-info {
+            padding: 20px;
+        }
+
+        .nft-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .nft-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .nft-detail-item {
+            text-align: center;
+        }
+
+        .nft-detail-label {
+            font-size: 0.8em;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .nft-detail-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .price-tag {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px;
+            color: #888;
+            font-size: 1.2em;
+        }
+
+        .external-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .external-link:hover {
+            text-decoration: underline;
+        }
+
+        .save-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .save-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .save-btn.saved {
+            background: #667eea;
+            color: white;
+        }
+
+        .nft-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .collection-tab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+            z-index: 100;
+        }
+
+        .collection-tab:hover {
+            transform: scale(1.05);
+        }
+
+        .collection-badge {
+            background: white;
+            color: #667eea;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid #4caf50;
+        }
+
+        .toast.error {
+            border-left: 4px solid #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Objkt NFT Explorer</h1>
+        
+        <div class="search-section">
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="addressInput" 
+                    placeholder="Ingresa la dirección del artista (ej: tz1U8x9dUtdv4mtLUvaukpMNVi1wvNxr1gy2)"
+                    value="tz1U8x9dUtdv4mtLUvaukpMNVi1wvNxr1gy2"
+                >
+                <button onclick="searchArtist()" id="searchBtn">Buscar</button>
+            </div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="stats" class="stats" style="display: none;">
+            <div class="stat-card">
+                <h3 id="totalTokens">0</h3>
+                <p>Total NFTs</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalListed">0</h3>
+                <p>En Venta</p>
+            </div>
+        </div>
+
+        <div id="filters" class="filters" style="display: none;">
+            <button class="filter-btn active" onclick="filterByType('all')">Todos</button>
+            <button class="filter-btn" onclick="filterByType('image')">Imágenes</button>
+            <button class="filter-btn" onclick="filterByType('video')">Videos</button>
+            <button class="filter-btn" onclick="filterByType('gif')">GIFs</button>
+            <button class="filter-btn" onclick="filterByType('listed')">En Venta</button>
+            <button class="filter-btn" onclick="showCollection()">⭐ Mi Colección</button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Cargando NFTs...
+        </div>
+
+        <div id="gallery" class="gallery"></div>
+        
+        <div class="collection-tab" onclick="showCollection()">
+            ⭐ Mi Colección
+            <span class="collection-badge" id="collectionCount">0</span>
+        </div>
+
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script>
+        let allTokens = [];
+        let currentFilter = 'all';
+        let myCollection = [];
+
+        // Cargar colección al iniciar
+        loadCollectionCount();
+
+        async function loadCollectionCount() {
+            try {
+                const response = await fetch('http://localhost:5000/api/collection');
+                const data = await response.json();
+                myCollection = data.collection || [];
+                document.getElementById('collectionCount').textContent = myCollection.length;
+            } catch (error) {
+                console.error('Error cargando colección:', error);
+            }
+        }
+
+        function isInCollection(tokenId) {
+            return myCollection.some(t => t.token_id === tokenId);
+        }
+
+        async function toggleSave(event, token) {
+            event.stopPropagation();
+            
+            const btn = event.target;
+            const isCurrentlySaved = isInCollection(token.token_id);
+            
+            try {
+                if (isCurrentlySaved) {
+                    // Eliminar de la colección
+                    const response = await fetch('http://localhost:5000/api/collection/remove', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token_id: token.token_id })
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showToast('Eliminado de tu colección', 'success');
+                        await loadCollectionCount();
+                        btn.textContent = '🤍';
+                        btn.classList.remove('saved');
+                    }
+                } else {
+                    // Agregar a la colección
+                    const response = await fetch('http://localhost:5000/api/collection/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(token)
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        showToast('¡Agregado a tu colección!', 'success');
+                        await loadCollectionCount();
+                        btn.textContent = '💙';
+                        btn.classList.add('saved');
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                }
+            } catch (error) {
+                showToast('Error al guardar: ' + error.message, 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        async function showCollection() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('gallery').innerHTML = '';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/collection');
+                const data = await response.json();
+                
+                if (data.collection && data.collection.length > 0) {
+                    allTokens = data.collection;
+                    displayTokens(data.collection);
+                    document.getElementById('stats').style.display = 'none';
+                    
+                    // Actualizar filtros
+                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                } else {
+                    document.getElementById('gallery').innerHTML = '<div class="no-results">Tu colección está vacía. ¡Empieza a guardar tus NFTs favoritos!</div>';
+                }
+            } catch (error) {
+                showToast('Error cargando colección', 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        async function searchArtist() {
+            const address = document.getElementById('addressInput').value.trim();
+            if (!address) {
+                showError('Por favor ingresa una dirección válida');
+                return;
+            }
+
+            document.getElementById('searchBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('gallery').innerHTML = '';
+            document.getElementById('stats').style.display = 'none';
+            document.getElementById('filters').style.display = 'none';
+
+            try {
+                const response = await fetch('http://localhost:5000/api/get-tokens', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ address: address })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showError(data.error);
+                } else if (data.success) {
+                    allTokens = data.tokens;
+                    displayStats(data);
+                    displayTokens(data.tokens);
+                    document.getElementById('filters').style.display = 'flex';
+                }
+            } catch (error) {
+                showError('Error de conexión. Asegúrate de que el servidor Python esté corriendo en el puerto 5000');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('searchBtn').disabled = false;
+            }
+        }
+
+        function displayStats(data) {
+            const listedCount = data.tokens.filter(t => t.price).length;
+            document.getElementById('totalTokens').textContent = data.count;
+            document.getElementById('totalListed').textContent = listedCount;
+            document.getElementById('stats').style.display = 'flex';
+        }
+
+        function displayTokens(tokens) {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = '';
+
+            if (tokens.length === 0) {
+                gallery.innerHTML = '<div class="no-results">No se encontraron NFTs para este artista</div>';
+                return;
+            }
+
+            tokens.forEach(token => {
+                const card = document.createElement('div');
+                card.className = 'nft-card';
+                
+                let mediaHTML = '';
+                if (token.mime && token.mime.startsWith('video')) {
+                    mediaHTML = `<video class="nft-media" autoplay loop muted playsinline><source src="${token.asset_url}" type="${token.mime}"></video>`;
+                } else {
+                    mediaHTML = `<img class="nft-media" src="${token.thumbnail_url || token.asset_url}" alt="${token.name}" onerror="this.src='https://via.placeholder.com/300?text=No+Preview'">`;
+                }
+
+                const isSaved = isInCollection(token.token_id);
+                const saveIcon = isSaved ? '💙' : '🤍';
+                const savedClass = isSaved ? 'saved' : '';
+
+                // Crear el botón de guardar
+                const saveBtn = document.createElement('button');
+                saveBtn.className = `save-btn ${savedClass}`;
+                saveBtn.textContent = saveIcon;
+                saveBtn.onclick = (e) => toggleSave(e, token);
+
+                // Crear el contenido de la tarjeta
+                card.innerHTML = `
+                    ${mediaHTML}
+                    <div class="nft-info">
+                        <div class="nft-title">${token.name}</div>
+                        ${token.description ? `<p style="color: #666; font-size: 0.9em; margin-top: 5px;">${token.description.substring(0, 100)}${token.description.length > 100 ? '...' : ''}</p>` : ''}
+                        <div class="nft-details">
+                            <div class="nft-detail-item">
+                                <div class="nft-detail-label">Token ID</div>
+                                <div class="nft-detail-value">#${token.token_id}</div>
+                            </div>
+                            <div class="nft-detail-item">
+                                <div class="nft-detail-label">Edición</div>
+                                <div class="nft-detail-value">${token.supply}</div>
+                            </div>
+                        </div>
+                        ${token.price ? `<div class="price-tag">💰 ${token.price}</div>` : '<div style="margin-top: 10px; color: #888;">No listado</div>'}
+                        <a href="${token.objkt_url}" target="_blank" class="external-link" onclick="event.stopPropagation()">Ver en Objkt →</a>
+                    </div>
+                `;
+
+                // Insertar el botón al inicio de la tarjeta
+                card.insertBefore(saveBtn, card.firstChild);
+                
+                // Click en la tarjeta (excepto en el botón)
+                card.onclick = (e) => {
+                    if (!e.target.classList.contains('save-btn')) {
+                        window.open(token.objkt_url, '_blank');
+                    }
+                };
+
+                gallery.appendChild(card);
+            });
+        }
+        
+
+        function filterByType(type) {
+            currentFilter = type;
+            
+            // Update active button
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            let filteredTokens = allTokens;
+
+            switch(type) {
+                case 'image':
+                    filteredTokens = allTokens.filter(t => t.mime && t.mime.startsWith('image') && !t.mime.includes('gif'));
+                    break;
+                case 'video':
+                    filteredTokens = allTokens.filter(t => t.mime && t.mime.startsWith('video'));
+                    break;
+                case 'gif':
+                    filteredTokens = allTokens.filter(t => t.mime && t.mime.includes('gif'));
+                    break;
+                case 'listed':
+                    filteredTokens = allTokens.filter(t => t.price);
+                    break;
+            }
+
+            displayTokens(filteredTokens);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Allow Enter key to search
+        document.getElementById('addressInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchArtist();
+            }
+        });
+    </script>
+</body>
+</html>
