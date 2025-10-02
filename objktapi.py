@@ -207,8 +207,11 @@ def api_remove_from_collection():
         return jsonify({'success': False, 'message': 'No se encontró en tu colección'})
 
 if __name__ == '__main__':
-    print("🚀 Servidor iniciado en http://localhost:5000")
+    print("🚀 Servidor iniciado")
     print("📁 Búsquedas completas → objkt_data.json")
     print("⭐ Tu colección personal → my_collection.json")
-    print("📂 Asegúrate de tener el archivo index.html en la carpeta templates/")
-    app.run(debug=True, port=5000)
+    
+    # Para producción, usar host='0.0.0.0'
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
